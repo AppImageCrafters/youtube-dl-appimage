@@ -2,7 +2,7 @@
 version: 1
 script:
   # Remove any previous build
-  - which curl || (apt-get update && apt-get install -y curl)
+  - which curl || (apt-get update && apt-get install -y curl breeze-icon-theme)
   - rm -rf AppDir || true
 
 AppDir:
@@ -11,7 +11,7 @@ AppDir:
   app_info:
     id: org.youtube-dl
     name: youtube-dl
-    icon: utilities-terminal
+    icon: text-x-python3
     version: latest
     # Set the python executable as entry point
     exec: usr/bin/python3
