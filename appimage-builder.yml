@@ -41,16 +41,16 @@ AppDir:
       - usr/share/doc/*/TODO.*
 
   after_bundle: |
-    # Set bundle env
-    export LD_LIBRARY_PATH=${APPDIR}/opt/libc/lib/x86_64-linux-gnu:${APPDIR}/usr/lib/x86_64-linux-gnu/
-    # Set python 3.8 env
-    export PYTHONHOME=${APPDIR}/usr
-    export PYTHONPATH=${APPDIR}/usr/lib/python3.8/site-packages:$APPDIR/usr/lib/python3.8
-    export PATH=${APPDIR}/usr/bin:$PATH
     # Set python 3.8 as default
     ln -fs python3.8 $APPDIR/usr/bin/python3
     # Install pip
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+
+    # Prepare environment for running the embed python
+    export LD_LIBRARY_PATH=${APPDIR}/opt/libc/lib/x86_64-linux-gnu:${APPDIR}/usr/lib/x86_64-linux-gnu/
+    export PYTHONHOME=${APPDIR}/usr
+    export PYTHONPATH=${APPDIR}/usr/lib/python3.8/site-packages:$APPDIR/usr/lib/python3.8
+    export PATH=${APPDIR}/usr/bin:$PATH
     python3 get-pip.py
     # Install pipenv
     python3 -m pip install youtube-dl certifi 
