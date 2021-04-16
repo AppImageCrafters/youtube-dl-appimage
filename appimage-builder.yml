@@ -1,0 +1,98 @@
+# appimage-builder recipe https://appimage-builder.readthedocs.io/en/latest/
+version: 1
+script:
+  # Remove any previous build
+  - which curl || (apt-get update && apt-get install -y curl)
+  - rm -rf AppDir || true
+
+AppDir:
+  path: ./AppDir
+
+  app_info:
+    id: org.youtube-dl
+    name: youtube-dl
+    icon: utilities-terminal
+    version: latest
+    # Set the python executable as entry point
+    exec: usr/bin/python3
+    # Set the application main script path as argument. Use '$@' to forward CLI parameters
+    exec_args: "$APPDIR/usr/local/bin/youtube-dl $@"
+
+  apt:
+    arch: amd64
+    sources:
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+
+    include:
+      - python3
+      - python3-distutils
+    exclude:
+      - mime-support
+
+  files:
+    exclude:
+      - usr/lib/x86_64-linux-gnu/gconv
+      - usr/share/man
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
+
+  after_bundle: |
+    # Set python 3.8 env
+    export PYTHONHOME=${APPDIR}/usr
+    export PYTHONPATH=${APPDIR}/usr/lib/python3.8/site-packages:$APPDIR/usr/lib/python3.8
+    export PATH=${APPDIR}/usr/bin:$PATH
+    # Set python 3.8 as default
+    ln -fs python3.8 $APPDIR/usr/bin/python3
+    # Install pip
+    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+    python3 get-pip.py
+    # Install pipenv
+    python3 -m pip install youtube-dl certifi 
+    python3 -m pip cache purge
+    python3 -m pip uninstall -y pip
+
+  runtime:
+    env:
+      # Set python home
+      # See https://docs.python.org/3/using/cmdline.html#envvar-PYTHONHOME
+      PYTHONHOME: '${APPDIR}/usr'
+      # Path to the site-packages dir or other modules dirs
+      # See https://docs.python.org/3/using/cmdline.html#envvar-PYTHONPATH
+      PYTHONPATH: '${APPDIR}/usr/lib/python3.8/site-packages'
+      # SSL Certificates are placed in a different location for every system therefore we ship our own copy
+      SSL_CERT_FILE: '${APPDIR}/usr/local/lib/python3.8/dist-packages/certifi/cacert.pem'
+  
+  after_runtime:
+    # remove pyc files
+    - find AppDir/ -name '*.pyc' -exec rm '{}' \;
+
+  test:
+    fedora:
+      image: appimagecrafters/tests-env:fedora-30
+      command: ./AppRun --help
+      use_host_x: true
+    debian:
+      image: appimagecrafters/tests-env:debian-stable
+      command: ./AppRun --help
+      use_host_x: true
+    arch:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: ./AppRun --help
+      use_host_x: true
+    centos:
+      image: appimagecrafters/tests-env:centos-7
+      command: ./AppRun --help
+      use_host_x: true
+    ubuntu:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: ./AppRun --help
+      use_host_x: true
+
+AppImage:
+  update-information: 'gh-releases-zsync|AppImageCrafters|youtube-dl-appimage|latest|youtube-dl-*x86_64.AppImage.zsync'
+  sign-key: None
+  arch: x86_64
