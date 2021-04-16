@@ -41,6 +41,8 @@ AppDir:
       - usr/share/doc/*/TODO.*
 
   after_bundle: |
+    # Set bundle env
+    export LD_LIBRARY_PATH=${APPDIR}/opt/libc/lib/x86_64-linux-gnu:${APPDIR}/usr/lib/x86_64-linux-gnu/
     # Set python 3.8 env
     export PYTHONHOME=${APPDIR}/usr
     export PYTHONPATH=${APPDIR}/usr/lib/python3.8/site-packages:$APPDIR/usr/lib/python3.8
