@@ -51,11 +51,12 @@ AppDir:
     export PYTHONHOME=${APPDIR}/usr
     export PYTHONPATH=${APPDIR}/usr/lib/python3.8/site-packages:$APPDIR/usr/lib/python3.8
     export PATH=${APPDIR}/usr/bin:$PATH
-    python3 get-pip.py
+    export PYTHON="${APPDIR}/opt/libc/lib64/ld-linux-x86-64.so.2 ${APPDIR}/usr/bin/python3"
+    $PYTHON get-pip.py
     # Install pipenv
-    python3 -m pip install youtube-dl certifi 
-    python3 -m pip cache purge
-    python3 -m pip uninstall -y pip
+    $PYTHON -m pip install youtube-dl certifi 
+    $PYTHON -m pip cache purge
+    $PYTHON -m pip uninstall -y pip
 
   runtime:
     env:
