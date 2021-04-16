@@ -1,0 +1,31 @@
+name: AppImage Release
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: Ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Pack unsing appimage-builder
+      uses: docker://appimagecrafters/appimage-builder:0.8.7
+      with:
+        entrypoint: appimage-builder
+        args: --recipe ./appimage-builder.yml --skip-test 
+    - name: Save build Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: AppImage
+        path: './*.AppImage*'
+    - name: Release AppImage
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+        title: Continuous build
+        automatic_release_tag: 'continuous'
+        prerelease: true
+        draft: false
+        files: './*.AppImage*'
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
